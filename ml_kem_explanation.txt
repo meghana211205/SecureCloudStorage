@@ -1,0 +1,39 @@
+A SIMPLE EXPLANATION OF ML-KEM (POST-QUANTUM CRYPTOGRAPHY)
+=============================================================
+
+This document is written clearly so you can easily include it in your B.Tech project report or presentation. It explains the core concept of ML-KEM and how it replaces RSA.
+
+### 1. What is ML-KEM?
+ML-KEM stands for "Module-Lattice-Based Key Encapsulation Mechanism." It is the official algorithm standardized by the US Government (NIST) to protect data against future Quantum Computers. Before it was officially standardized as FIPS-203, it was known in the cryptography community as "CRYSTALS-Kyber".
+
+### 2. Why is RSA Bad Against Quantum Computers?
+RSA relies on the fact that standard computers are very slow at factoring enormous prime numbers. For a normal computer, breaking an RSA-2048 key could take millions of years. However, a powerful Quantum Computer running "Shor's Algorithm" can solve these prime number equations almost instantly, completely destroying RSA security. 
+
+ML-KEM fixes this. Instead of prime numbers, ML-KEM hides its secrets inside a highly complex multi-dimensional mathematical grid called a "Lattice", using a problem called "Learning With Errors". Even the most powerful theoretical quantum computers cannot easily solve lattice problems.
+
+### 3. How "Key Transport" (RSA) Works
+To understand ML-KEM, it helps to review the old RSA way.
+RSA is a "Key Transport" system. It works like a physical lockbox:
+1. You generate a random secret password (the AES key).
+2. You take the user's Public Key (the open lockbox) and put your AES key inside it.
+3. You lock the box and send it across the internet or save it to a database.
+4. The user takes their Private Key, unlocks the box, and gets the AES key out.
+
+### 4. How "Key Encapsulation" (ML-KEM) Works
+ML-KEM is completely different. You DO NOT create a secret key first and lock it inside a box. Instead, ML-KEM generates a mathematical puzzle.
+
+**The Upload Process (Encapsulation):**
+When a user uploads a file, the server feeds the user's ML-KEM Public Key into the algorithm. The math engine grinds and dynamically spits out two things simultaneously:
+  1. A `Shared Secret` (This is your 256-bit AES Key).
+  2. A `Ciphertext` (A mathematical puzzle that represents the secret).
+
+You immediately use that `Shared Secret` to encrypt your file with AES. Then, you permanently destroy/delete the secret from your computer! All you do is save the `Ciphertext` puzzle piece in your database. 
+
+**The Download Process (Decapsulation):**
+When the user wants to download their file, they pull the weird `Ciphertext` puzzle from the database. 
+They feed that `Ciphertext` AND their secret `Private Key` into the ML-KEM algorithm.
+By combining the puzzle piece and the private key, the math engine acts like a magic trick and identically recreates the exact same `Shared Secret` that the server deleted earlier! 
+The user then uses this magically recovered AES key to decrypt their file.
+
+### Summary for your Project Report
+In your project, the file itself is encrypted using standard AES-256. But the AES key is protected using Post-Quantum ML-KEM Encapsulation. Because the AES Key is mathematically derived and "encapsulated" into a Lattice matrix rather than wrapped in a standard prime-number equation, any data stored in your Secure Cloud Storage system is heavily protected against both modern hackers and future Quantum supercomputers.

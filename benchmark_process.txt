@@ -1,0 +1,46 @@
+SECURE CLOUD STORAGE - BENCHMARK TESTING PROCESS
+=================================================
+
+This document outlines the exact step-by-step process used by the `benchmark_rsa.py` script to test the performance of the system. This methodology effectively simulates a real user uploading and downloading files on the cloud platform.
+
+### PHASE 1: INITIALIZATION (Simulating a Logged-In User)
+Before the stopwatch starts, the system prepares the environment:
+1. Dummy Data: Generates random, gibberish bytes exactly matching the target file size (e.g., 1MB or 10MB) inside the computer's memory (RAM).
+2. RSA Key Generation: Simulates a user creating an account by generating one static, highly secure 2048-bit RSA Public/Private key pair. 
+
+-------------------------------------------------
+
+### PHASE 2: UPLOAD WORKFLOW MEASUREMENT 
+The stopwatch is started. The script will run the following exact sequence (a loop) 100 times to simulate a user uploading 100 files:
+
+  Step 1. Hashing
+  The system calculates an SHA-256 fingerprint of the original file.
+  
+  Step 2. AES Data Encryption 
+  The system generates a brand new, random 256-bit AES key. It then encrypts the large dummy file using the fast AES-GCM algorithm. This outputs the ciphertext, a nonce, and a verification tag.
+  
+  Step 3. RSA Key Wrapping
+  The system takes the newly generated AES key and completely locks it inside the user's static RSA Public Key container.
+
+The stopwatch stops. The total time is divided by 100 to find the extremely accurate "Average Upload Time."
+
+-------------------------------------------------
+
+### PHASE 3: DOWNLOAD WORKFLOW MEASUREMENT
+A single valid encrypted package from Phase 2 is kept. The stopwatch is started. The script runs the reverse sequence 100 times to simulate the user downloading their file 100 times:
+
+  Step 1. RSA Key Unwrapping
+  The system takes the user's static RSA Private Key and unlocks the container to retrieve the specific AES file key.
+
+  Step 2. AES Data Decryption
+  The system uses the retrieved AES key (along with the nonce and tag) to powerfully decrypt the large ciphertext file back into plain text bytes.
+
+  Step 3. Integrity Verification (Hashing)
+  The system runs an SHA-256 fingerprint on the newly decrypted text to ensure it matches the originally uploaded file, proving no data corruption occurred.
+
+The stopwatch stops. The total time is divided by 100 to find the extremely accurate "Average Download Time."
+
+-------------------------------------------------
+
+### PHASE 4: RESULTS REPORTING
+The averages are presented in a clean table format so they can be recorded. When the project is later upgraded to Post-Quantum ML-KEM, the exact same process will run again, replacing the RSA logic with ML-KEM, to perfectly compare the new benchmark speeds against these baseline speeds.

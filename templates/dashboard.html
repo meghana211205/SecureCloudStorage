@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Welcome, {{ username }}!</h2>
+<p>This is your secure dashboard. Here you will be able to upload and manage your encrypted files.</p>
+
+<div style="margin-top: 20px;">
+    <h3>Upload File</h3>
+    <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+        <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; display: inline-block;">
+            <p style="margin: 0 0 10px 0; font-weight: bold;">Select Encryption Algorithm:</p>
+            <input type="radio" id="rsa" name="encryption_algo" value="RSA" required>
+            <label for="rsa" style="margin-right: 15px;">Standard RSA-2048</label>
+            
+            <input type="radio" id="mlkem" name="encryption_algo" value="ML-KEM" required>
+            <label for="mlkem">Post-Quantum ML-KEM</label>
+        </div><br>
+        <input type="file" name="file" required style="margin-bottom: 10px;"><br>
+        <button type="submit">Upload & Encrypt</button>
+    </form>
+</div>
+
+<div style="margin-top: 40px;">
+    <h3>Your Encrypted Files</h3>
+    {% if files %}
+        <table>
+            <tr>
+                <th>Filename</th>
+                <th>Hash (SHA-256)</th>
+                <th>Algorithm</th>
+                <th>Actions</th>
+            </tr>
+            {% for f in files %}
+            <tr>
+                <td>{{ f.filename }}</td>
+                <td style="font-family: monospace; font-size: 0.9em;">{{ f.sha256_hash[:20] }}...</td>
+                <td>
+                    {% if f.encryption_algo == 'ML-KEM' %}
+                        <span style="background-color: #d4edda; padding: 3px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ML-KEM</span>
+                    {% else %}
+                        <span style="background-color: #e2e3e5; padding: 3px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">RSA</span>
+                    {% endif %}
+                </td>
+                <td><a href="{{ url_for('download', file_id=f.id) }}">Download & Decrypt</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p><i>You have not uploaded any files yet.</i></p>
+    {% endif %}
+</div>
+{% endblock %}

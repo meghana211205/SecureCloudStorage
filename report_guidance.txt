@@ -1,0 +1,36 @@
+GUIDANCE FOR REPORT: NOVELTY & CRYPTANALYSIS
+============================================
+
+Every great B.Tech project requires a "Novelty" section (Why is your project special?) and a "Cryptanalysis" section (How secure is the math?). Here is exactly how to write those sections for your specific project.
+
+---------------------------------------------------------
+SECTION 1: NOVELTY (What makes your project unique?)
+---------------------------------------------------------
+Most undergraduate cloud storage projects just use AES and RSA and stop there.My project is a "Forward-Looking Hybrid System."
+
+My Novelty Points:
+1. **Practical Quantum Resistance:** While many researchers only study ML-KEM in isolated academic scripts, My project demonstrates real-world application by integrating it into a fully functional web-stack (Flask/SQLite).
+2. **Hybrid Crypto Agility:** The system doesn't just replace RSA; it runs RSA and ML-KEM side-by-side. If a flaw is discovered in ML-KEM tomorrow, the system can instantly fall back to classical RSA. This concept of "Crypto Agility" is a massive buzzword in modern enterprise security.
+3. **Zero-Raw Storage Integration:** The system explicitly avoids saving original files, demonstrating an enterprise payload lifecycle (Hash -> Encrypt -> Encapsulate -> Destroy Original).
+
+---------------------------------------------------------
+SECTION 2: CRYPTANALYSIS (Mathematical Threat Modeling)
+---------------------------------------------------------
+In this section, you need to break down the three cryptographic primitives you used and analyze how they hold up against attacks. You can use these exact points:
+
+### 1. Payload Analysis (AES-256-GCM)
+*   **The Math:** 256-bit Advanced Encryption Standard running in Galois/Counter Mode.
+*   **Brute Force Resistance:** Even with a Quantum Computer using "Grover's Algorithm" (which halves the effective bit-strength), AES-256 still mathematically provides 128 bits of quantum security. It would take all the computers on Earth billions of years to guess the key.
+*   **Authentication:** Because we used GCM (which produces an authentication `tag`), the ciphertext is immune to "Padding Oracle Attacks" or "Bit-Flipping Attacks." If a hacker tries to modify the encrypted file on the hard drive, the `tag` will fail to verify and your Python script will refuse to decrypt it.
+
+### 2. Classical Wrapper Analysis (RSA-2048)
+*   **The Math:** Relies on Integer Factorization (the mathematical difficulty of finding the prime factors of extremely large numbers).
+*   **Classical Resistance:** Currently unbroken by standard supercomputers using the General Number Field Sieve (GNFS).
+*   **Vulnerability (Shor's Algorithm):** This is the weak link evaluated in your thesis. A sufficiently scaled Quantum Computer can execute Shor's Algorithm to locate the period of the function and factor the RSA primes in polynomial time. Once factored, the AES key is exposed.
+
+### 3. Post-Quantum Wrapper Analysis (ML-KEM-768)
+*   **The Math:** Based on the "Module Learning With Errors" (MLWE) problem over Lattices.
+*   **Quantum Resistance:** Unlike prime factorization, finding the closest vector in a multi-dimensional lattice grid cannot be exponentially sped up by Shor's Algorithm. Thus, it remains secure against Quantum Computers.
+*   **Parameter Strength:** You used the ML_KEM_768 parameter set, which NIST classifies as "Category 3". This means the theoretical difficulty to break the puzzle box is mathematically equivalent to the effort required to break pure AES-192. It is considered impenetrable by highly funded nation-state hackers.
+
+

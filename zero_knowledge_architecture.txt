@@ -1,0 +1,37 @@
+SYSTEM ARCHITECTURE: TRUSTED SERVER VS ZERO-KNOWLEDGE
+=====================================================
+
+This document outlines the current architecture of the Secure Cloud Storage project, explicitly identifying its capabilities, its limitations, and detailing the theoretical upgrade path to an industry-standard "Zero-Knowledge" system.
+
+### 1. The Hardest Problem in Cybersecurity: Key Distribution
+A brilliant realization in system design is the paradox of the Private Key: If the private key is truly private, the server shouldn't have it. But if the server doesn't have it, how do you access your files when you log in from a brand new laptop? This is the fundamental problem of Key Management and Distribution.
+
+### 2. What Our Current Project Achieves ("Trusted Server" Model)
+Right now, our Flask backend is acting as a "Trusted Server." 
+When a user logs in, the server pulls their ML-KEM Private Key from the SQLite database, unlocks it in the server's RAM, and performs the decapsulation and file decryption on the server itself. Finally, it sends the unlocked file over the network to the user's browser.
+
+**Our Capabilities:**
+*   **Post-Quantum Resilience:** We have successfully integrated NIST FIPS-203 (ML-KEM-768), ensuring that the cryptographic math happening on the server cannot be broken by future quantum computers.
+*   **Hybrid Agility:** The system dynamically toggles between classical RSA-2048 and Quantum ML-KEM, proving full backwards compatibility.
+*   **Data at Rest Encryption:** Files saved to the hard drive are strictly encrypted using AES-256-GCM. An attacker who steals the hard drive gets absolutely nothing but mathematical garbage.
+
+### 3. Our Limitations Compared to Zero-Knowledge Architecture
+While our math is quantum-proof, our delivery mechanism requires "Trust."
+*   **RAM Exposure:** Because the cryptography happens on the Flask server, the raw unencrypted file and the raw Private Key exist in the server's system memory for a fraction of a second while processing.
+*   **Malicious Admin Risk:** If the server administrator (or a hacker who breaches the server) modifies the Flask code, they could easily log and steal the Private Keys as they are processed in `app.py`.
+*   **Bandwidth Bottleneck:** The server has to do the heavy lifting of decrypting the files before sending them, which severely limits how many users the server can handle at once.
+
+### 4. The Industry Standard: "Zero-Knowledge" Key Wrapping
+To build a true "Zero-Knowledge" Cloud (like Proton Drive or Signal) and fix our limitations, the server must NEVER see the raw Private Key or the unencrypted file. All cryptography must execute directly inside the user's web browser (Client-Side Encryption). 
+
+To achieve this while still allowing users to log in from anywhere, industry standards use "Key Wrapping":
+1. **Registration:** The user's browser generates the keys. The browser uses the user's Password to generate a "Wrapper Key". It places the Private Key inside a mathematical safe encrypted by the Wrapper Key, and sends ONLY the locked safe to the server.
+2. **Login:** On a new laptop, the user downloads the locked safe from the server. By typing their password, their new browser regenerates the Wrapper Key, unlocks the safe locally, and pulls out the Private Key without the server ever seeing it.
+
+### 5. Future Scope for this Project
+For the scope of this semester's delivery, the "Trusted Server" model was explicitly chosen to guarantee the successful backend implementation, benchmarking, and demonstration of ML-KEM mathematics prior to the deadline. 
+
+**Future Expansion Phases:**
+*   **Phase 1 (Client-Side Shift):** Port our Python ML-KEM and AES logic into WebAssembly (WASM) or pure Javascript so it can run inside the user's browser.
+*   **Phase 2 (Zero-Knowledge Passwords):** Implement PBKDF2/Argon2 Key Wrapping in the browser so that the SQLite database strictly stores wrapped, inaccessible Private Keys.
+*   **Phase 3 (True E2EE):** Achieve a fully sovereign Zero-Knowledge architecture where the Flask server operates strictly as a blind storage locker, incapable of reading any user data.
